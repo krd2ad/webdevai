@@ -1,0 +1,73 @@
+name: Pull Tool Submissions from Tally
+
+on:
+  schedule:
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install jq and core utilities
+        run: sudo apt-get install -y jq moreutils
+
+      - name: Fetch submissions from Tally
+        env:
+          TALLY_API_KEY: ${{ secrets.TALLY_API_KEY }}
+        run: |
+          curl -s -X POST https://tally.so/api/v1/forms/mKKJWA/responses \
+            -H "Authorization: Bearer $TALLY_API_KEY" \
+            -H "Content-Type: application/json" \
+            --data '{"pageSize": 50}' \
+          | jq -r '.data[] | [.answers[0].value, .answers[1].value, .answers[2].value, .answers[3].value] | @tsv' > new-submissions.txt
+
+      - name: Clean and validate new submissions
+        run: |
+          grep -Ev "^$" new-submissions.txt | while IFS=$'\t' read -r name link desc tags; do
+            if [[ -z "$name" || -z "$link" || "$link" != http* ]]; then
+              echo "Skipping invalid entry: $name | $link"
+              continue
+            fi
+
+            if grep -iq "$link" tools.js || grep -iq "$name" tools.js; then
+              echo "Skipping duplicate: $name"
+              continue
+            fi
+
+            entry="  {
+    name: \"$name\",
+    description: \"$desc\",
+    link: \"$link\",
+    tags: [$(echo \"$tags\" | sed 's/, */\", \"/g' | sed 's/^/\"/' | sed 's/$/\"/')]
+  },"
+
+            echo "$entry" >> formatted-tools.txt
+          done
+
+      - name: Insert new tools into tools.js array
+        run: |
+          if [ -s formatted-tools.txt ]; then
+            if grep -q "]" tools.js; then
+              head -n -1 tools.js > temp-tools.js
+              echo "," >> temp-tools.js
+              cat formatted-tools.txt >> temp-tools.js
+              echo "]" >> temp-tools.js
+              mv temp-tools.js tools.js
+            else
+              cat formatted-tools.txt >> tools.js
+            fi
+          else
+            echo "No new tools to add."
+          fi
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add tools.js
+          git commit -m "Add new validated tools from Tally" || echo "Nothing to commit"
+          git push || echo "Nothing to push"
