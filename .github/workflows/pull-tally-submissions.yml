@@ -38,14 +38,12 @@ jobs:
               continue
             fi
 
-            entry="  {
-    name: \"$name\",
-    description: \"$desc\",
-    link: \"$link\",
-    tags: [$(echo \"$tags\" | sed 's/, */\", \"/g' | sed 's/^/\"/' | sed 's/$/\"/')]
-  },"
-
-            echo "$entry" >> formatted-tools.txt
+            echo "  {" >> formatted-tools.txt
+            echo "    name: \"$name\"," >> formatted-tools.txt
+            echo "    description: \"$desc\"," >> formatted-tools.txt
+            echo "    link: \"$link\"," >> formatted-tools.txt
+            echo "    tags: [$(echo \"$tags\" | sed 's/, */\", \"/g' | sed 's/^/\"/' | sed 's/$/\"/')]" >> formatted-tools.txt
+            echo "  }," >> formatted-tools.txt
           done
 
       - name: Insert new tools into tools.js array
