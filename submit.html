@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Submit a Tool - Web Dev AI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-900">
+  <div class="max-w-xl mx-auto mt-12 p-6 bg-white shadow rounded">
+    <h1 class="text-2xl font-bold mb-4">Submit an AI Tool to Web Dev AI</h1>
+    <form action="https://formspree.io/f/YOURFORMID" method="POST" class="space-y-4">
+      <input type="text" name="name" placeholder="Tool name" class="w-full px-3 py-2 border rounded" required>
+      <input type="url" name="link" placeholder="Tool link (https://...)" class="w-full px-3 py-2 border rounded" required>
+      <textarea name="description" placeholder="Short description" rows="3" class="w-full px-3 py-2 border rounded" required></textarea>
+      <input type="text" name="tags" placeholder="Tags (comma-separated)" class="w-full px-3 py-2 border rounded">
+      <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Submit</button>
+    </form>
+    <!-- Replace the Formspree action URL with your form ID -->
+  </div>
+</body>
+</html>
