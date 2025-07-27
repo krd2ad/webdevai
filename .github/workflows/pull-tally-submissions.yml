@@ -64,10 +64,19 @@ jobs:
             echo "No new tools to add."
           fi
 
+      - name: Append to changelog
+        run: |
+          if [ -s formatted-tools.txt ]; then
+            echo "## 📅 $(date -u +"%Y-%m-%d %H:%M UTC")" >> changelog.md
+            echo "" >> changelog.md
+            cat formatted-tools.txt | sed 's/^/    /' >> changelog.md
+            echo -e "\n---\n" >> changelog.md
+          fi
+
       - name: Commit and push changes
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add tools.js
+          git add tools.js changelog.md
           git commit -m "Add new validated tools from Tally" || echo "Nothing to commit"
           git push || echo "Nothing to push"
