@@ -60,3 +60,4 @@ const tools = [
     tags: ["Editor", "AI IDE", "Productivity"]
   }
 ];
+\n// Auto-updates would go here.
